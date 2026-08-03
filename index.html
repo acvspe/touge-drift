@@ -12,7 +12,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
             user-select: none;  
             -webkit-user-select: none;
-            touch-action: none; /* Evita gestos molestos en celulares al arrastrar */
+            touch-action: none;
         }  
         
         #speedometer-container {  
@@ -89,11 +89,10 @@
         #menu {  
             position: absolute;  
             top: 0; left: 0; width: 100%; height: 100%;  
-            background: rgba(5, 8, 17, 0.3);  
-            backdrop-filter: blur(4px);  
+            background: transparent; /* Eliminado fondo global para limpiar showroom */
             z-index: 1000;  
             display: flex;  
-            flex-direction: row; /* Pantalla dividida en PC */
+            flex-direction: row; 
             color: white;  
             transition: opacity 0.5s;  
         }  
@@ -114,7 +113,7 @@
             padding: 30px 20px;
             box-sizing: border-box;
             overflow-y: auto;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); /* Blur restringido solo al panel lateral */
         }
         #showroom-right h2.title {
             text-align: center;
@@ -195,7 +194,7 @@
 
         #radio-hud {
             position: absolute; 
-            top: 20px;  /* Cambiado a la esquina superior izquierda */
+            top: 20px;  
             left: 20px; 
             background: rgba(10, 15, 25, 0.85); 
             border: 2px solid #00eeff; 
@@ -249,7 +248,7 @@
         #t-radio { top: 80px; left: 20px; width: auto; padding: 10px 20px; height: 40px; border-radius: 20px; font-size: 16px; border-color: #00eeff; background: rgba(0, 238, 255, 0.15); }
         #t-radio:active { background: rgba(0, 238, 255, 0.6); }
 
-        /* REAJUSTE PARA CELULARES (Layout apilado) */
+        /* REAJUSTE PARA CELULARES */
         @media (max-width: 768px) {
             #mode-menu h1 { font-size: 2.5em; }
             #menu { flex-direction: column; }
@@ -257,7 +256,7 @@
             #showroom-right { width: 100%; flex: 0.6; border-left: none; border-top: 2px solid #ffaa00; padding: 15px; }
             
             #speedometer-container {
-                width: 120px; height: 120px; opacity: 0.5; /* Transparente para ver los botones traseros */
+                width: 120px; height: 120px; opacity: 0.5;
                 pointer-events: none;
             }
             #race-hud { width: 130px; top: 15px; right: 15px; padding: 10px; }
@@ -338,7 +337,6 @@
     <div id="race-hud">  
         <div style="font-size: 14px; font-weight: bold; color: #ccc; letter-spacing: 1px;">POSICIÓN</div>  
         
-        <!-- Número Gigante -->  
         <div style="font-size: 3.5em; font-weight: bold; color: #ffaa00; line-height: 1; margin: 5px 0;">
             <span id="pos-number">1</span><span style="font-size: 0.4em; color: #888;">/10</span>
         </div>
@@ -350,7 +348,7 @@
         <canvas id="minimap" width="160" height="180" style="background: rgba(0,0,0,0.6); border: 1px solid #555; border-radius: 5px;"></canvas>  
     </div>  
 
-    <!-- Notificación de Radio (Esquina Superior Izquierda) -->  
+    <!-- Notificación de Radio -->  
     <div id="radio-hud">  
         <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">📻 RADIO TOUGE FM</div>  
         <div id="radio-track-name" style="font-size: 14px; font-weight: bold; color: #00eeff;"></div>  
@@ -371,7 +369,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>  
 
     <script>  
-        // Estado Global
         let isTouchMode = false;
         
         function selectMode(touchEnabled) {
@@ -380,7 +377,7 @@
             setTimeout(() => {
                 document.getElementById('mode-menu').style.display = 'none';
                 document.getElementById('menu').style.display = 'flex';
-                previewCar('ae86'); // Renderiza el primero automáticamente
+                previewCar('ae86'); 
             }, 400);
         }
 
@@ -422,11 +419,11 @@
         }  
 
         // -------------------------------------------------------------  
-        // ESCENA Y CONFIGURACIÓN BÁSICA  
+        // ESCENA Y CONFIGURACIÓN BÁSICA (Y SHOWROOM)
         // -------------------------------------------------------------  
         const scene = new THREE.Scene();  
-        scene.background = new THREE.Color(0x080d1a);  
-        scene.fog = new THREE.FogExp2(0x080d1a, 0.012);  
+        // Eliminada la niebla inicial para dejar un fondo oscuro y limpio de exhibición
+        scene.background = new THREE.Color(0x050811);  
 
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);  
         const renderer = new THREE.WebGLRenderer({ antialias: true });  
@@ -440,9 +437,25 @@
         moonLight.castShadow = true;  
         scene.add(moonLight);  
 
-        const showroomLight = new THREE.SpotLight(0xffffff, 2.0, 50, Math.PI / 4, 0.5);  
+        // Luces especiales para el concesionario (Showroom)
+        const showroomLight = new THREE.SpotLight(0xffffff, 4.0, 50, Math.PI / 4, 0.5);  
         showroomLight.position.set(0, 8, 5);  
+        showroomLight.castShadow = true;
         scene.add(showroomLight);  
+
+        const showroomBacklight = new THREE.SpotLight(0x00eeff, 3.0, 50, Math.PI / 4, 0.5);
+        showroomBacklight.position.set(-5, 5, -8);
+        scene.add(showroomBacklight);
+
+        // Piso pulido exclusivo para la exhibición
+        const showroomFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(100, 100),
+            new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.1, metalness: 0.7 })
+        );
+        showroomFloor.rotation.x = -Math.PI / 2;
+        showroomFloor.position.y = -0.15; // Justo por debajo de las ruedas
+        showroomFloor.receiveShadow = true;
+        scene.add(showroomFloor);
 
         // -------------------------------------------------------------  
         // MATERIALES DE ALTA CALIDAD PARA AUTOS  
@@ -652,7 +665,9 @@
             else if (type === 'r34') buildR34();  
             else if (type === 'porsche') buildPorsche911();  
               
-            carGroup.rotation.set(0.1, 0, 0);   
+            // Reseteamos rotaciones para evitar ladeos
+            carGroup.rotation.x = 0;   
+            carGroup.rotation.z = 0;   
         }  
 
         function startGame(type) {  
@@ -661,12 +676,19 @@
               
             document.getElementById('speedometer-container').style.display = 'block';  
             document.getElementById('race-hud').style.display = 'block';  
+            
+            // TRANSICIÓN A LA CARRERA (Añadimos niebla, ocultamos showroom, mostramos pista)
+            scene.fog = new THREE.FogExp2(0x080d1a, 0.012);
+            showroomFloor.visible = false;
+            showroomLight.visible = false;
+            showroomBacklight.visible = false;
+            chunks.forEach(c => c.visible = true);
+            
             initRivals(type);  
 
             previewCar(type);  
-            carGroup.position.set(0, 0, 0);  // Reseteamos posición al iniciar la carrera
+            carGroup.position.set(0, 0, 0); 
             carGroup.rotation.set(0, 0, 0);  
-            showroomLight.visible = false;  
             carSpotLight.visible = true;  
 
             if (type === 'ae86') {  
@@ -780,7 +802,10 @@
             wallGeo.setIndex(wIdx); wallGeo.computeVertexNormals();  
             chunkGroup.add(new THREE.Mesh(wallGeo, sharedBarrierMat));  
 
-            scene.add(chunkGroup); return chunkGroup;  
+            // OCULTAR LOS PEDAZOS DE PISTA AL INICIO PARA EL SHOWROOM
+            chunkGroup.visible = false;
+            scene.add(chunkGroup); 
+            return chunkGroup;  
         }  
 
         let lowestChunkZ = 0;  
@@ -793,7 +818,9 @@
                 if (chunk.position.z > carGroup.position.z + CHUNK_SIZE) {  
                     scene.remove(chunk); chunk.traverse(c => { if (c.geometry) c.geometry.dispose(); });  
                     const newZ = lowestChunkZ - CHUNK_SIZE; const index = chunks.indexOf(chunk);  
-                    chunks[index] = createContinuousChunk(newZ); lowestChunkZ = newZ;  
+                    chunks[index] = createContinuousChunk(newZ); 
+                    chunks[index].visible = true; // Asegurar que el nuevo chunk sea visible en carrera
+                    lowestChunkZ = newZ;  
                 }  
             });  
         }  
@@ -1099,11 +1126,11 @@
 
         function updateCamera() {  
             if (!isGameRunning) {  
-                // Compensa el punto de enfoque en PC para no quedar tapado por el menú de selección
-                let centerOffset = window.innerWidth > 768 ? -1.5 : 0;
-                camera.position.lerp(new THREE.Vector3(5 + centerOffset, 3.5, 6), 0.05);  
+                // CENTRAMOS LA CÁMARA EN EL SHOWROOM PARA EXHIBIR EL AUTO
+                let centerOffset = window.innerWidth > 768 ? -2.5 : 0;
+                camera.position.lerp(new THREE.Vector3(centerOffset + 4.5, 2.0, 6.0), 0.05);  
                 camera.lookAt(centerOffset, 0.5, 0);  
-                carGroup.rotation.y += 0.008;  
+                carGroup.rotation.y += 0.005; // Rotación constante tipo plataforma
                 return;  
             }  
 
