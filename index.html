@@ -441,8 +441,6 @@
         showroomBacklight.position.set(-5, 5, -8);
         scene.add(showroomBacklight);
 
-        // --- CONSTANTE DE ALTURA DE PISTA ---
-        // Y = -0.18 es el nivel exacto donde el polígono exterior de las llantas toca el suelo.
         const ROAD_Y = -0.18; 
 
         const showroomFloor = new THREE.Mesh(
@@ -450,7 +448,7 @@
             new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.8, metalness: 0.2 })
         );
         showroomFloor.rotation.x = -Math.PI / 2;
-        showroomFloor.position.y = ROAD_Y; // Nivelamos el showroom al mismo nivel de la pista
+        showroomFloor.position.y = ROAD_Y; 
         showroomFloor.receiveShadow = true;
         scene.add(showroomFloor);
 
@@ -597,27 +595,55 @@
             const carMeshGroup = new THREE.Group(); carMeshGroup.name = "CarMesh";  
             const bodyMat = customColor !== null ? new THREE.MeshToonMaterial({ color: customColor, gradientMap: toonMap }) : carBodyMat;  
 
-            carMeshGroup.add(createShapeMesh([[2.1, 0.08], [2.1, 0.25], [-2.1, 0.25], [-2.1, 0.08]], blackMat, 1.8));  
-            carMeshGroup.add(createShapeMesh([[2.1, 0.25], [2.1, 0.45], [0.8, 0.5], [0.2, 0.95], [-0.8, 0.95], [-1.8, 0.5], [-2.1, 0.5], [-2.1, 0.25]], bodyMat, 1.78));  
-            carMeshGroup.add(createShapeMesh([[0.6, 0.52], [0.1, 0.90], [-0.7, 0.90], [-1.6, 0.52]], glassMat, 1.82));  
-            addWindshield(carMeshGroup, [0.8, 0.5], [0.2, 0.95], 1.78, glassMat);  
+            // Base negra (faldones y parachoques)
+            carMeshGroup.add(createShapeMesh([[2.11, 0.08], [2.11, 0.26], [-2.11, 0.26], [-2.11, 0.08]], blackMat, 1.82));  
+            
+            // --- NUEVO COFRE INCLINADO HACHI-ROKU ---
+            // Se redujo la altura frontal de 0.45 a 0.32, dándole una agresiva caída hacia la nariz.
+            carMeshGroup.add(createShapeMesh([[2.09, 0.24], [2.09, 0.32], [0.8, 0.52], [0.2, 0.95], [-0.8, 0.95], [-1.8, 0.5], [-2.09, 0.5], [-2.09, 0.24]], bodyMat, 1.78));  
+            
+            // Cristales
+            carMeshGroup.add(createShapeMesh([[0.6, 0.54], [0.1, 0.90], [-0.7, 0.90], [-1.6, 0.52]], glassMat, 1.82));  
+            addWindshield(carMeshGroup, [0.8, 0.52], [0.2, 0.95], 1.78, glassMat);  
             addWindshield(carMeshGroup, [-0.8, 0.95], [-1.8, 0.5], 1.78, glassMat);   
 
-            const popUp = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.3), blackMat);  
-            popUp.position.set(1.7, 0.48, 0.65); carMeshGroup.add(popUp);  
-            const popUp2 = popUp.clone(); popUp2.position.set(1.7, 0.48, -0.65); carMeshGroup.add(popUp2);  
+            // --- CARCASAS POP-UP ---
+            // Tienen el color de la carrocería, están levantadas y orientadas hacia el frente.
+            const popUpGeo = new THREE.BoxGeometry(0.25, 0.12, 0.35);
+            
+            const popUp = new THREE.Mesh(popUpGeo, bodyMat);  
+            popUp.position.set(1.75, 0.45, 0.65); 
+            popUp.rotation.z = -0.2; // Inclinación hacia adelante
+            popUp.add(new THREE.LineSegments(new THREE.EdgesGeometry(popUpGeo), new THREE.LineBasicMaterial({ color: outlineColor })));
+            carMeshGroup.add(popUp);  
+            
+            const popUp2 = new THREE.Mesh(popUpGeo, bodyMat);  
+            popUp2.position.set(1.75, 0.45, -0.65); 
+            popUp2.rotation.z = -0.2; // Inclinación hacia adelante
+            popUp2.add(new THREE.LineSegments(new THREE.EdgesGeometry(popUpGeo), new THREE.LineBasicMaterial({ color: outlineColor })));
+            carMeshGroup.add(popUp2);  
               
-            const hlGeo = new THREE.BoxGeometry(0.05, 0.04, 0.28);  
-            const hl1 = new THREE.Mesh(hlGeo, popUpLightMat); hl1.position.set(1.78, 0.48, 0.65); carMeshGroup.add(hl1);  
-            const hl2 = new THREE.Mesh(hlGeo, popUpLightMat); hl2.position.set(1.78, 0.48, -0.65); carMeshGroup.add(hl2);  
+            // --- FAROS DE LOS POP-UP ---
+            const hlGeo = new THREE.BoxGeometry(0.02, 0.1, 0.30);  
+            
+            const hl1 = new THREE.Mesh(hlGeo, popUpLightMat); 
+            hl1.position.set(1.85, 0.45, 0.65); 
+            hl1.rotation.z = -0.2;
+            carMeshGroup.add(hl1);  
+            
+            const hl2 = new THREE.Mesh(hlGeo, popUpLightMat); 
+            hl2.position.set(1.85, 0.45, -0.65); 
+            hl2.rotation.z = -0.2;
+            carMeshGroup.add(hl2);  
               
-            const flGeo = new THREE.BoxGeometry(0.05, 0.1, 0.35);  
-            const fl1 = new THREE.Mesh(flGeo, popUpLightMat); fl1.position.set(2.11, 0.35, 0.65); carMeshGroup.add(fl1);  
-            const fl2 = new THREE.Mesh(flGeo, popUpLightMat); fl2.position.set(2.11, 0.35, -0.65); carMeshGroup.add(fl2);  
+            // --- NOTA: Los faros inferiores cuadrados fueron eliminados ---
 
-            const grille = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.15, 0.8), blackMat);  
-            grille.position.set(2.11, 0.35, 0); carMeshGroup.add(grille);  
+            // Parrilla delantera ajustada al cofre bajo
+            const grille = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.8), blackMat);  
+            grille.position.set(2.11, 0.28, 0); 
+            carMeshGroup.add(grille);  
 
+            // Luces traseras
             const tl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.15, 1.6), tailLightMat); tl.position.set(-2.11, 0.35, 0);  
             carMeshGroup.add(tl);  
 
@@ -723,7 +749,6 @@
             document.getElementById('race-hud').style.display = 'block';  
             
             scene.background = new THREE.Color(0x131926); 
-            // --- CLAVE: Niebla fuertemente nocturna de nuevo, respetando el fondo ---
             scene.fog = new THREE.FogExp2(0x131926, 0.025); 
             
             showroomFloor.visible = false;
@@ -838,7 +863,6 @@
             const grassPlane = new THREE.Mesh(new THREE.PlaneGeometry(400, CHUNK_SIZE), sharedGrassMat);  
 
             grassPlane.rotation.x = -Math.PI / 2;  
-            // Ajustamos ligeramente el césped por debajo de la carretera para evitar Z-fighting
             grassPlane.position.set(0, ROAD_Y - 0.02, -CHUNK_SIZE / 2);  
             chunkGroup.add(grassPlane);  
 
@@ -853,7 +877,6 @@
                 const xL = cx + nx * w2; const zL = zLocal + nz * w2;  
                 const xR = cx - nx * w2; const zR = zLocal - nz * w2;  
 
-                // --- CLAVE: La carretera ahora se dibuja en ROAD_Y, pegada a las ruedas ---
                 rPos.push(xL, ROAD_Y, zL, xR, ROAD_Y, zR);  
                 const vRoad = zGlobal / 8; rUv.push(0, vRoad, 1, vRoad);  
 
