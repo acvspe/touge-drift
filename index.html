@@ -419,7 +419,7 @@
         }  
 
         // -------------------------------------------------------------  
-        // ESCENA Y CONFIGURACIÓN BÁSICA (Y SHOWROOM)
+        // ESCENA Y CONFIGURACIÓN BÁSICA ANIME (Luces de alto contraste)
         // -------------------------------------------------------------  
         const scene = new THREE.Scene();  
         scene.background = new THREE.Color(0x050811);  
@@ -430,8 +430,11 @@
         renderer.shadowMap.enabled = true;  
         document.body.appendChild(renderer.domElement);  
 
-        scene.add(new THREE.AmbientLight(0xddeeff, 0.4));  
-        const moonLight = new THREE.DirectionalLight(0x88aaff, 0.6);  
+        // Luz ambiental oscura/azulada para llenar las sombras profundas
+        scene.add(new THREE.AmbientLight(0x2a2a3a, 1.2)); 
+        
+        // Luz direccional blanca muy fuerte para generar el corte del Toon Shader
+        const moonLight = new THREE.DirectionalLight(0xffffff, 1.5);  
         moonLight.position.set(30, 50, 20);  
         moonLight.castShadow = true;  
         scene.add(moonLight);  
@@ -441,11 +444,10 @@
         showroomLight.castShadow = true;
         scene.add(showroomLight);  
 
-        const showroomBacklight = new THREE.SpotLight(0x00eeff, 2.0, 50, Math.PI / 4, 0.5);
+        const showroomBacklight = new THREE.SpotLight(0x00eeff, 2.5, 50, Math.PI / 4, 0.5);
         showroomBacklight.position.set(-5, 5, -8);
         scene.add(showroomBacklight);
 
-        // Piso mate para evitar brillo focal indeseado
         const showroomFloor = new THREE.Mesh(
             new THREE.PlaneGeometry(100, 100),
             new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.8, metalness: 0.2 })
@@ -456,22 +458,45 @@
         scene.add(showroomFloor);
 
         // -------------------------------------------------------------  
-        // MATERIALES DE ALTA CALIDAD PARA AUTOS  
+        // GENERADOR DE GRADIENTE CEL-SHADING (CORTES DUROS ANIME)
+        // -------------------------------------------------------------
+        function createToonGradient() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 3; // Reducido a 3 pasos para un look cómic más duro
+            canvas.height = 1;
+            const context = canvas.getContext('2d');
+            
+            // Colores del gradiente (Sombra oscura -> Tono Medio -> Brillo Alto)
+            context.fillStyle = '#222233'; context.fillRect(0, 0, 1, 1); 
+            context.fillStyle = '#888899'; context.fillRect(1, 0, 1, 1); 
+            context.fillStyle = '#ffffff'; context.fillRect(2, 0, 1, 1); 
+            
+            const gradientTexture = new THREE.CanvasTexture(canvas);
+            gradientTexture.minFilter = THREE.NearestFilter;
+            gradientTexture.magFilter = THREE.NearestFilter;
+            return gradientTexture;
+        }
+        
+        const toonMap = createToonGradient();
+        const outlineColor = 0x000000;
+
         // -------------------------------------------------------------  
-        const carBodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.2, metalness: 0.3 });  
+        // MATERIALES TOON DE ALTA CALIDAD  
+        // -------------------------------------------------------------  
+        const carBodyMat = new THREE.MeshToonMaterial({ color: 0xeeeeee, gradientMap: toonMap });  
 
         function setCarColor(hex) {  
             carBodyMat.color.setHex(hex);  
         }  
           
-        const glassMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.1, metalness: 0.9 });  
-        const tireMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });  
-        const rimMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });  
+        const glassMat = new THREE.MeshToonMaterial({ color: 0x111122, gradientMap: toonMap });  
+        const tireMat = new THREE.MeshToonMaterial({ color: 0x050505, gradientMap: toonMap });  
+        const rimMat = new THREE.MeshToonMaterial({ color: 0xbbbbbb, gradientMap: toonMap });  
         const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff1111 });  
         const popUpLightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });  
           
-        const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.2 });  
-        const silverMat = new THREE.MeshStandardMaterial({ color: 0x9999a3, roughness: 0.2, metalness: 0.8 });  
+        const blackMat = new THREE.MeshToonMaterial({ color: 0x111111, gradientMap: toonMap });  
+        const silverMat = new THREE.MeshToonMaterial({ color: 0x9999a3, gradientMap: toonMap });  
 
         const carGroup = new THREE.Group();  
         scene.add(carGroup);  
@@ -490,7 +515,7 @@
         carGroup.add(carSpotLight.target);  
 
         // -------------------------------------------------------------  
-        // FUNCIONES DE MODELADO GEOMÉTRICO (EXTRUSIÓN)  
+        // FUNCIONES DE MODELADO GEOMÉTRICO (Y CONTORNOS DE TINTA)
         // -------------------------------------------------------------  
         function createShapeMesh(points, material, width, zOffset = 0) {  
             const shape = new THREE.Shape();  
@@ -504,6 +529,11 @@
             mesh.position.z = -width / 2 + zOffset;  
             mesh.castShadow = true;  
             mesh.receiveShadow = true;  
+
+            const edges = new THREE.EdgesGeometry(geo, 20); 
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: outlineColor }));
+            mesh.add(line);
+
             return mesh;  
         }  
 
@@ -515,18 +545,31 @@
             const length = Math.hypot(rightP[0] - leftP[0], rightP[1] - leftP[1]);  
             const angle = Math.atan2(rightP[1] - leftP[1], rightP[0] - leftP[0]);  
               
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(length - 0.12, 0.04, width + 0.06), material);  
+            const geo = new THREE.BoxGeometry(length - 0.12, 0.04, width + 0.06);
+            const mesh = new THREE.Mesh(geo, material);  
             mesh.position.set(cx, cy, 0);  
             mesh.rotation.z = angle;  
             mesh.translateY(0.02);   
             mesh.castShadow = true;  
+            
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: outlineColor }));
+            mesh.add(line);
+
             group.add(mesh);  
         }  
 
         function addWheel(group, x, y, z) {  
             const wheelGroup = new THREE.Group();  
-            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.25, 16).rotateX(Math.PI / 2), tireMat);  
-            const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.27, 8).rotateX(Math.PI / 2), rimMat);  
+            const tireGeo = new THREE.CylinderGeometry(0.33, 0.33, 0.25, 16).rotateX(Math.PI / 2);
+            const rimGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.27, 8).rotateX(Math.PI / 2);
+            
+            const tire = new THREE.Mesh(tireGeo, tireMat);  
+            const rim = new THREE.Mesh(rimGeo, rimMat);  
+
+            tire.add(new THREE.LineSegments(new THREE.EdgesGeometry(tireGeo, 20), new THREE.LineBasicMaterial({ color: outlineColor })));
+            rim.add(new THREE.LineSegments(new THREE.EdgesGeometry(rimGeo, 20), new THREE.LineBasicMaterial({ color: outlineColor })));
+
             wheelGroup.add(tire); wheelGroup.add(rim);  
             wheelGroup.position.set(x, y, z);  
             group.add(wheelGroup);  
@@ -539,7 +582,7 @@
         function buildAE86(targetGroup = carGroup, customColor = null) {  
             const carMeshGroup = new THREE.Group(); carMeshGroup.name = "CarMesh";  
 
-            const bodyMat = customColor !== null ? new THREE.MeshStandardMaterial({ color: customColor, roughness: 0.2, metalness: 0.3 }) : carBodyMat;  
+            const bodyMat = customColor !== null ? new THREE.MeshToonMaterial({ color: customColor, gradientMap: toonMap }) : carBodyMat;  
 
             carMeshGroup.add(createShapeMesh([[2.1, 0.08], [2.1, 0.25], [-2.1, 0.25], [-2.1, 0.08]], blackMat, 1.8));  
             carMeshGroup.add(createShapeMesh([[2.1, 0.25], [2.1, 0.45], [0.8, 0.5], [0.2, 0.95], [-0.8, 0.95], [-1.8, 0.5], [-2.1, 0.5], [-2.1, 0.25]], bodyMat, 1.78));  
@@ -576,7 +619,7 @@
         function buildR34(targetGroup = carGroup, customColor = null) {  
             const carMeshGroup = new THREE.Group(); carMeshGroup.name = "CarMesh";  
 
-            const bodyMat = customColor !== null ? new THREE.MeshStandardMaterial({ color: customColor, roughness: 0.2, metalness: 0.3 }) : carBodyMat;  
+            const bodyMat = customColor !== null ? new THREE.MeshToonMaterial({ color: customColor, gradientMap: toonMap }) : carBodyMat;  
 
             carMeshGroup.add(createShapeMesh([[2.2, 0.1], [2.2, 0.35], [2.15, 0.45], [1.0, 0.55], [0.2, 1.0], [-0.7, 1.0], [-1.6, 0.58], [-2.2, 0.58], [-2.2, 0.2], [-1.8, 0.1]], bodyMat, 1.9));  
               
@@ -595,7 +638,10 @@
 
             const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), bodyMat); p1.position.set(-2.0, 0.7, 0.7); carMeshGroup.add(p1);  
             const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), bodyMat); p2.position.set(-2.0, 0.7, -0.7); carMeshGroup.add(p2);  
-            const wing = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 1.8), bodyMat); wing.position.set(-2.0, 0.85, 0);  
+            const wingGeo = new THREE.BoxGeometry(0.3, 0.05, 1.8);
+            const wing = new THREE.Mesh(wingGeo, bodyMat); 
+            wing.position.set(-2.0, 0.85, 0);  
+            wing.add(new THREE.LineSegments(new THREE.EdgesGeometry(wingGeo, 20), new THREE.LineBasicMaterial({ color: outlineColor })));
             carMeshGroup.add(wing);  
 
             const tlGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.05, 16).rotateZ(Math.PI/2);  
@@ -613,7 +659,7 @@
         function buildPorsche911(targetGroup = carGroup, customColor = null) {  
             const carMeshGroup = new THREE.Group(); carMeshGroup.name = "CarMesh";  
 
-            const bodyMat = customColor !== null ? new THREE.MeshStandardMaterial({ color: customColor, roughness: 0.2, metalness: 0.3 }) : carBodyMat;  
+            const bodyMat = customColor !== null ? new THREE.MeshToonMaterial({ color: customColor, gradientMap: toonMap }) : carBodyMat;  
 
             carMeshGroup.add(createShapeMesh([[2.1, 0.1], [2.1, 0.25], [1.7, 0.4], [0.8, 0.5], [0.2, 0.9], [-0.4, 0.95], [-1.3, 0.7], [-2.1, 0.4], [-2.15, 0.2], [-1.8, 0.1]], bodyMat, 1.9));  
               
@@ -674,7 +720,7 @@
             document.getElementById('speedometer-container').style.display = 'block';  
             document.getElementById('race-hud').style.display = 'block';  
             
-            scene.fog = new THREE.FogExp2(0x080d1a, 0.012);
+            scene.fog = new THREE.FogExp2(0x050811, 0.012);
             showroomFloor.visible = false;
             showroomLight.visible = false;
             showroomBacklight.visible = false;
@@ -706,14 +752,16 @@
         }  
 
         // -------------------------------------------------------------  
-        // SISTEMA DE HUMO Y ENTORNO  
+        // SISTEMA DE HUMO CARTOON SÓLIDO
         // -------------------------------------------------------------  
         const smokeParticles = [];  
-        const smokeGeo = new THREE.SphereGeometry(0.3, 6, 6);  
-        const smokeMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.6 });  
+        // Nubes poligonales marcadas para estética anime
+        const smokeGeo = new THREE.DodecahedronGeometry(0.4, 0);  
+        // Blanco puro sin sombras para el contraste
+        const smokeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });  
 
         function createSmokeParticle(x, z) {  
-            const p = new THREE.Mesh(smokeGeo, smokeMat.clone());  
+            const p = new THREE.Mesh(smokeGeo, smokeMat);  
             p.position.set(x + (Math.random() - 0.5) * 0.5, 0.1, z + (Math.random() - 0.5) * 0.5);  
             scene.add(p); smokeParticles.push({ mesh: p, life: 1.0 });  
         }  
@@ -721,28 +769,28 @@
         function updateSmoke() {  
             for (let i = smokeParticles.length - 1; i >= 0; i--) {  
                 const p = smokeParticles[i]; p.life -= 0.03;  
-                p.mesh.scale.addScalar(0.05); p.mesh.material.opacity = p.life * 0.5;  
-                if (p.life <= 0) { scene.remove(p.mesh); p.mesh.material.dispose(); smokeParticles.splice(i, 1); }  
+                p.mesh.scale.addScalar(0.06); 
+                if (p.life <= 0) { scene.remove(p.mesh); smokeParticles.splice(i, 1); }  
             }  
         }  
 
         const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();  
         function createRoadTexture() {  
             const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;  
-            const ctx = canvas.getContext('2d'); ctx.fillStyle = '#1f1f24'; ctx.fillRect(0,0,256,256); ctx.fillStyle = '#ddaa22';  
+            const ctx = canvas.getContext('2d'); ctx.fillStyle = '#111116'; ctx.fillRect(0,0,256,256); ctx.fillStyle = '#ddaa22';  
             ctx.fillRect(124, 0, 8, 128);  
             const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = maxAnisotropy; return tex;  
         }  
         function createBarrierTexture() {  
             const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;  
-            const ctx = canvas.getContext('2d'); ctx.fillStyle = '#eeeeee'; ctx.fillRect(0,0,256,128); ctx.fillStyle = '#444444';  
+            const ctx = canvas.getContext('2d'); ctx.fillStyle = '#eeeeee'; ctx.fillRect(0,0,256,128); ctx.fillStyle = '#222233';  
             ctx.fillRect(0,128,256,128);  
             const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = maxAnisotropy; return tex;  
         }  
 
-        const sharedRoadMat = new THREE.MeshStandardMaterial({ map: createRoadTexture(), roughness: 0.9, side: THREE.DoubleSide });  
-        const sharedBarrierMat = new THREE.MeshStandardMaterial({ map: createBarrierTexture(), roughness: 0.6, side: THREE.DoubleSide });  
-        const sharedGrassMat = new THREE.MeshStandardMaterial({ color: 0x142618, roughness: 1.0 });  
+        const sharedRoadMat = new THREE.MeshToonMaterial({ map: createRoadTexture(), gradientMap: toonMap, side: THREE.DoubleSide });  
+        const sharedBarrierMat = new THREE.MeshToonMaterial({ map: createBarrierTexture(), gradientMap: toonMap, side: THREE.DoubleSide });  
+        const sharedGrassMat = new THREE.MeshToonMaterial({ color: 0x0f1a14, gradientMap: toonMap });  
 
         const CHUNK_SIZE = 50; const TOTAL_CHUNKS = 8; const ROAD_WIDTH = 24; const chunks = [];  
         function getRoadCurveOffset(z) { return Math.sin(z * 0.04) * 22 + Math.cos(z * 0.015) * 12; }  
@@ -796,7 +844,10 @@
             wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(wPos, 3)); 
             wallGeo.setAttribute('uv', new THREE.Float32BufferAttribute(wUv, 2)); 
             wallGeo.setIndex(wIdx); wallGeo.computeVertexNormals();  
-            chunkGroup.add(new THREE.Mesh(wallGeo, sharedBarrierMat));  
+            
+            const wallMesh = new THREE.Mesh(wallGeo, sharedBarrierMat);
+            wallMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(wallGeo, 30), new THREE.LineBasicMaterial({ color: outlineColor })));
+            chunkGroup.add(wallMesh);  
 
             chunkGroup.visible = false;
             scene.add(chunkGroup); 
@@ -1113,16 +1164,18 @@
         }  
 
         // -------------------------------------------------------------  
-        // CÁMARA Y VELOCÍMETRO  
+        // CÁMARA Y VELOCÍMETRO (CORREGIDOS) 
         // -------------------------------------------------------------  
         const cameraOffset = new THREE.Vector3(0, 3.8, 9.5);  
 
         function updateCamera() {  
             if (!isGameRunning) {  
-                // Para que el auto quede a la izquierda, la cámara apunta hacia la derecha (X positivo)
-                let panX = window.innerWidth > 768 ? 2.5 : 0;
+                // SOLUCIÓN AL AUTO: panX positivo obliga a la cámara a mirar hacia la derecha (X positivo).
+                // Como el auto siempre se genera en el centro del mundo (X=0), la cámara lo encuadrará a su IZQUIERDA.
+                let panX = window.innerWidth > 768 ? 2.5 : 0; 
                 
-                camera.position.lerp(new THREE.Vector3(panX + 3.5, 2.5, 6.5), 0.05);  
+                // Ponemos la cámara un poco más a la derecha también para mantener un buen ángulo
+                camera.position.lerp(new THREE.Vector3(panX + 1.0, 2.5, 6.5), 0.05);  
                 camera.lookAt(panX, 0.5, 0);  
                 carGroup.rotation.y += 0.005;  
                 return;  
