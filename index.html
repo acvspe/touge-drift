@@ -89,7 +89,7 @@
         #menu {  
             position: absolute;  
             top: 0; left: 0; width: 100%; height: 100%;  
-            background: transparent; /* Eliminado fondo global para limpiar showroom */
+            background: transparent; 
             z-index: 1000;  
             display: flex;  
             flex-direction: row; 
@@ -113,7 +113,7 @@
             padding: 30px 20px;
             box-sizing: border-box;
             overflow-y: auto;
-            backdrop-filter: blur(10px); /* Blur restringido solo al panel lateral */
+            backdrop-filter: blur(10px); 
         }
         #showroom-right h2.title {
             text-align: center;
@@ -422,7 +422,6 @@
         // ESCENA Y CONFIGURACIÓN BÁSICA (Y SHOWROOM)
         // -------------------------------------------------------------  
         const scene = new THREE.Scene();  
-        // Eliminada la niebla inicial para dejar un fondo oscuro y limpio de exhibición
         scene.background = new THREE.Color(0x050811);  
 
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);  
@@ -437,23 +436,22 @@
         moonLight.castShadow = true;  
         scene.add(moonLight);  
 
-        // Luces especiales para el concesionario (Showroom)
         const showroomLight = new THREE.SpotLight(0xffffff, 4.0, 50, Math.PI / 4, 0.5);  
         showroomLight.position.set(0, 8, 5);  
         showroomLight.castShadow = true;
         scene.add(showroomLight);  
 
-        const showroomBacklight = new THREE.SpotLight(0x00eeff, 3.0, 50, Math.PI / 4, 0.5);
+        const showroomBacklight = new THREE.SpotLight(0x00eeff, 2.0, 50, Math.PI / 4, 0.5);
         showroomBacklight.position.set(-5, 5, -8);
         scene.add(showroomBacklight);
 
-        // Piso pulido exclusivo para la exhibición
+        // Piso mate para evitar brillo focal indeseado
         const showroomFloor = new THREE.Mesh(
             new THREE.PlaneGeometry(100, 100),
-            new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.1, metalness: 0.7 })
+            new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.8, metalness: 0.2 })
         );
         showroomFloor.rotation.x = -Math.PI / 2;
-        showroomFloor.position.y = -0.15; // Justo por debajo de las ruedas
+        showroomFloor.position.y = -0.15; 
         showroomFloor.receiveShadow = true;
         scene.add(showroomFloor);
 
@@ -665,7 +663,6 @@
             else if (type === 'r34') buildR34();  
             else if (type === 'porsche') buildPorsche911();  
               
-            // Reseteamos rotaciones para evitar ladeos
             carGroup.rotation.x = 0;   
             carGroup.rotation.z = 0;   
         }  
@@ -677,7 +674,6 @@
             document.getElementById('speedometer-container').style.display = 'block';  
             document.getElementById('race-hud').style.display = 'block';  
             
-            // TRANSICIÓN A LA CARRERA (Añadimos niebla, ocultamos showroom, mostramos pista)
             scene.fog = new THREE.FogExp2(0x080d1a, 0.012);
             showroomFloor.visible = false;
             showroomLight.visible = false;
@@ -802,7 +798,6 @@
             wallGeo.setIndex(wIdx); wallGeo.computeVertexNormals();  
             chunkGroup.add(new THREE.Mesh(wallGeo, sharedBarrierMat));  
 
-            // OCULTAR LOS PEDAZOS DE PISTA AL INICIO PARA EL SHOWROOM
             chunkGroup.visible = false;
             scene.add(chunkGroup); 
             return chunkGroup;  
@@ -819,7 +814,7 @@
                     scene.remove(chunk); chunk.traverse(c => { if (c.geometry) c.geometry.dispose(); });  
                     const newZ = lowestChunkZ - CHUNK_SIZE; const index = chunks.indexOf(chunk);  
                     chunks[index] = createContinuousChunk(newZ); 
-                    chunks[index].visible = true; // Asegurar que el nuevo chunk sea visible en carrera
+                    chunks[index].visible = true; 
                     lowestChunkZ = newZ;  
                 }  
             });  
@@ -1000,7 +995,6 @@
               
             racers.sort((a, b) => a.z - b.z);  
             
-            // Actualizar número gigante en lugar de lista
             const playerPos = racers.findIndex(r => r.isPlayer) + 1;
             document.getElementById('pos-number').innerText = playerPos;
               
@@ -1040,7 +1034,6 @@
         bindTouchButton('t-brake', 'ArrowDown');
         bindTouchButton('t-drift', 'Space');
 
-        // Botón especial para radio (cambia de emisora)
         document.getElementById('t-radio').addEventListener('touchstart', (e) => {
             e.preventDefault();
             if(isGameRunning) {
@@ -1126,11 +1119,12 @@
 
         function updateCamera() {  
             if (!isGameRunning) {  
-                // CENTRAMOS LA CÁMARA EN EL SHOWROOM PARA EXHIBIR EL AUTO
-                let centerOffset = window.innerWidth > 768 ? -2.5 : 0;
-                camera.position.lerp(new THREE.Vector3(centerOffset + 4.5, 2.0, 6.0), 0.05);  
-                camera.lookAt(centerOffset, 0.5, 0);  
-                carGroup.rotation.y += 0.005; // Rotación constante tipo plataforma
+                // Para que el auto quede a la izquierda, la cámara apunta hacia la derecha (X positivo)
+                let panX = window.innerWidth > 768 ? 2.5 : 0;
+                
+                camera.position.lerp(new THREE.Vector3(panX + 3.5, 2.5, 6.5), 0.05);  
+                camera.lookAt(panX, 0.5, 0);  
+                carGroup.rotation.y += 0.005;  
                 return;  
             }  
 
