@@ -420,23 +420,6 @@
             density: 0.015
         };
 
-        const skyLoader = new THREE.TextureLoader();
-        
-        // URLs y arreglo para cargar los fondos iterativos (noche, atardecer, día)
-        const skyUrls = [
-            'https://user.uploads.dev/file/6e7b5cd188e18570066572734ddd6537.jpg', // Touge
-            'https://user.uploads.dev/file/f6db733457fc9863419b08b72237de39.jpg', // Rally
-            'https://user.uploads.dev/file/943d27ed14f8c374328c490838cdf970.jpg'  // Racing
-        ];
-        const skyTextures = new Array(3);
-        skyUrls.forEach((url, i) => {
-            skyLoader.load(url, function(texture) {
-                texture.minFilter = THREE.LinearFilter;
-                texture.generateMipmaps = false;
-                skyTextures[i] = texture;
-            });
-        });
-
         function selectGameMode(mode) {
             gameMode = mode;
             document.getElementById('mode-menu').style.opacity = '0';
@@ -575,6 +558,16 @@
         const skyGeo = new THREE.CylinderGeometry(400, 400, 250, 40);
         skyGeo.scale(-1, 1, 1);
         const skyMat = new THREE.MeshBasicMaterial({ fog: false, color: 0x556688 });
+
+        // Cargar fondo estático único
+        const skyLoader = new THREE.TextureLoader();
+        skyLoader.load('https://user.uploads.dev/file/6e7b5cd188e18570066572734ddd6537.jpg', function(texture) {
+            texture.minFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
+            skyMat.map = texture;
+            skyMat.needsUpdate = true;
+        });
+
         const skybox = new THREE.Mesh(skyGeo, skyMat);
         skybox.position.y = 35; 
         skybox.visible = false; 
@@ -1176,9 +1169,7 @@
             });
         }  
 
-        let currentSkyIndex = -1;
-
-        // Cambiar niebla, fondo y cielos según la distancia
+        // Cambiar niebla y fondo según la distancia (sin alterar el cielo)
         function updateEnvironment() {
             let playerDistance = Math.max(0, -carGroup.position.z);
             
@@ -1187,14 +1178,6 @@
             const targetColor = biomeFogColors[biomeIndex];
             scene.fog.color.lerp(targetColor, 0.01);
             scene.background.lerp(targetColor, 0.01);
-
-            // Actualizar textura del cielo cada 2000m
-            const skyIndex = Math.floor(playerDistance / 2000) % skyTextures.length;
-            if (currentSkyIndex !== skyIndex && skyTextures[skyIndex]) {
-                currentSkyIndex = skyIndex;
-                skyMat.map = skyTextures[skyIndex];
-                skyMat.needsUpdate = true;
-            }
         }
 
         // -------------------------------------------------------------  
