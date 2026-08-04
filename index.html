@@ -161,12 +161,11 @@
 
         .car-container { display: flex; flex-direction: column; gap: 15px; }  
         .car-card { background: rgba(30, 40, 60, 0.6); border: 2px solid #444; border-radius: 12px; padding: 15px; text-align: left; cursor: pointer; transition: all 0.3s; }  
-        .car-card:hover { transform: translateX(-10px); box-shadow: -10px 10px 20px rgba(255, 170, 0, 0.2); background: rgba(40, 50, 70, 0.9); }  
+        .car-card:hover { transform: translateX(-10px); border-color: #ffaa00; box-shadow: -10px 10px 20px rgba(255, 170, 0, 0.2); background: rgba(40, 50, 70, 0.9); }  
         .car-card h3 { margin: 0 0 5px 0; color: #fff; text-align: center; font-size: 1.1em;}  
         .car-card p { font-size: 11px; color: #ccc; line-height: 1.4; margin-bottom: 10px; }  
         .stat { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; font-weight: bold; }  
         .val { color: #ffaa00; }  
-        .car-price { font-size: 12px; font-weight: bold; text-align: center; margin-top: 10px; padding: 5px; border-radius: 5px; background: rgba(0,0,0,0.5); }
 
         #color-palette { display: flex; gap: 15px; background: rgba(10, 15, 25, 0.8); padding: 12px 25px; border-radius: 30px; border: 2px solid #555; }  
         .color-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }  
@@ -229,22 +228,22 @@
             <div class="mode-card" onclick="selectGameMode('contrarreloj')">
                 <div style="font-size: 3.5em; margin-bottom: 10px;">⏱️</div>
                 <h3>CONTRARRELOJ</h3>
-                <p>Tú solo contra el tiempo. Ganas ¥5,000 al pasar 5000m.</p>
+                <p>Tú solo contra el tiempo. Consigue tu récord en 5000m.</p>
             </div>
             <div class="mode-card" onclick="selectGameMode('touge')">
                 <div style="font-size: 3.5em; margin-bottom: 10px;">🛣️</div>
                 <h3>TOUGE</h3>
-                <p>9 Rivales. 7000m. 1º Lugar = ¥15,000</p>
+                <p>9 Rivales. Sin tráfico. Llega primero a la meta (7000m).</p>
             </div>
             <div class="mode-card" onclick="selectGameMode('streetrace')">
                 <div style="font-size: 3.5em; margin-bottom: 10px;">🏎️</div>
                 <h3>STREET RACE</h3>
-                <p>4 Rivales + Tráfico. 6000m. 1º Lugar = ¥12,000</p>
+                <p>4 Rivales y tráfico lento en contra. Meta a los 6000m.</p>
             </div>
             <div class="mode-card" onclick="showEndlessConfig()">
                 <div style="font-size: 3.5em; margin-bottom: 10px;">♾️</div>
                 <h3>ENDLESS TOUGE</h3>
-                <p>Configurable. Ganas ¥1,000 por cada kilómetro.</p>
+                <p>Modo infinito relajante y configurable por ti.</p>
             </div>
         </div>
     </div>
@@ -302,7 +301,7 @@
     <div id="victory-screen" class="fullscreen-menu">
         <h1>¡META ALCANZADA!</h1>
         <h2 id="victory-msg"></h2>
-        <button class="reload-btn" onclick="returnToMenu()">Volver al Menú</button>
+        <button class="reload-btn" onclick="location.reload()">Volver al Menú</button>
     </div>
 
     <!-- Menú de Selección de Autos -->  
@@ -319,53 +318,49 @@
 
         <div id="showroom-right">
             <div class="showroom-header">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <h2 class="title" id="showroom-title">AUTO</h2>
-                    <button class="info-btn" style="padding: 5px 10px; font-size: 0.8em;" onclick="goBackToModes()">🔄 MODO</button>
-                </div>
-                <div style="font-size: 1.2em; font-weight: bold; color: #00ffcc;">¥ <span id="money-display">0</span></div>
-                <button class="info-btn" onclick="showControlsModal()">🕹️ INFO</button>
+                <h2 class="title" id="showroom-title">AUTO</h2>
+                <button class="info-btn" onclick="showControlsModal()">🕹️ CONTROLES</button>
             </div>
             
             <div class="car-container">  
-                <div class="car-card" id="card-ae86" onmouseenter="previewCar('ae86')" onclick="handleCarClick('ae86')">  
+                <div class="car-card" onmouseenter="previewCar('ae86')" onclick="startGame('ae86')">  
                     <h3>AE86 TRUENO</h3>  
-                    <p>Lento en rectas, domina las curvas con drift prolongado.</p>  
-                    <div class="stat"><span>Velocidad:</span><span class="val">Baja</span></div>  
-                    <div class="stat"><span>Control:</span><span class="val">Excelente</span></div>  
-                    <div class="car-price" id="price-ae86"></div>
+                    <p>Equilibrado y ligero. Perfecto para mantener derrapes largos con máximo control.</p>  
+                    <div class="stat"><span>Velocidad:</span><span class="val">Regular</span></div>  
+                    <div class="stat"><span>Control:</span><span class="val">Alto</span></div>  
+                    <div class="stat"><span>Drift:</span><span class="val">Excelente</span></div>  
                 </div>  
 
-                <div class="car-card" id="card-rx7" onmouseenter="previewCar('rx7')" onclick="handleCarClick('rx7')">  
+                <div class="car-card" onmouseenter="previewCar('rx7')" onclick="startGame('rx7')">  
                     <h3>MAZDA RX-7</h3>  
-                    <p>Agil, veloz, pero derrapa agresivamente. Difícil de controlar.</p>  
-                    <div class="stat"><span>Velocidad:</span><span class="val">Buena</span></div>  
+                    <p>Motor rotativo legendario. Ágil, veloz y diseñado especialmente para quemar llanta.</p>  
+                    <div class="stat"><span>Velocidad:</span><span class="val">Alta</span></div>  
                     <div class="stat"><span>Control:</span><span class="val">Medio</span></div>  
-                    <div class="car-price" id="price-rx7"></div>
+                    <div class="stat"><span>Drift:</span><span class="val">Extremo</span></div>  
                 </div>  
 
-                <div class="car-card" id="card-evo" onmouseenter="previewCar('evo')" onclick="handleCarClick('evo')">  
+                <div class="car-card" onmouseenter="previewCar('evo')" onclick="startGame('evo')">  
                     <h3>MITSUBISHI EVO X</h3>  
-                    <p>Tracción integral. Aceleración brutal y máximo agarre.</p>  
+                    <p>Tracción integral dominadora. Ideal para no perder velocidad en las curvas cerradas.</p>  
                     <div class="stat"><span>Velocidad:</span><span class="val">Alta</span></div>  
                     <div class="stat"><span>Control:</span><span class="val">Máximo</span></div>  
-                    <div class="car-price" id="price-evo"></div>
+                    <div class="stat"><span>Drift:</span><span class="val">Preciso</span></div>  
                 </div>  
 
-                <div class="car-card" id="card-porsche" onmouseenter="previewCar('porsche')" onclick="handleCarClick('porsche')">  
-                    <h3>PORSCHE 911</h3>  
-                    <p>Motor trasero. Muy rápido, drift técnico para expertos.</p>  
-                    <div class="stat"><span>Velocidad:</span><span class="val">Muy Alta</span></div>  
-                    <div class="stat"><span>Control:</span><span class="val">Sensible</span></div>  
-                    <div class="car-price" id="price-porsche"></div>
-                </div>  
-
-                <div class="car-card" id="card-r34" onmouseenter="previewCar('r34')" onclick="handleCarClick('r34')">  
+                <div class="car-card" onmouseenter="previewCar('r34')" onclick="startGame('r34')">  
                     <h3>NISSAN R34 GTR</h3>  
-                    <p>Velocidad bestial, pero pesa demasiado. Cuesta girar.</p>  
-                    <div class="stat"><span>Velocidad:</span><span class="val">Extrema</span></div>  
+                    <p>Una bestia pesada de tracción total. Altísimas velocidades pero requiere agresividad.</p>  
+                    <div class="stat"><span>Velocidad:</span><span class="val">Máxima</span></div>  
                     <div class="stat"><span>Control:</span><span class="val">Bajo</span></div>  
-                    <div class="car-price" id="price-r34"></div>
+                    <div class="stat"><span>Drift:</span><span class="val">Pesado</span></div>  
+                </div>  
+
+                <div class="car-card" onmouseenter="previewCar('porsche')" onclick="startGame('porsche')">  
+                    <h3>PORSCHE 911</h3>  
+                    <p>Ingeniería de motor trasero. Aceleración brutal; derrapa preciso pero rápido.</p>  
+                    <div class="stat"><span>Velocidad:</span><span class="val">Muy Alta</span></div>  
+                    <div class="stat"><span>Control:</span><span class="val">Extremo</span></div>  
+                    <div class="stat"><span>Drift:</span><span class="val">Técnico</span></div>  
                 </div>  
             </div> 
         </div> 
@@ -410,87 +405,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>  
 
     <script>  
-        // -------------------------------------------------------------  
-        // GESTIÓN DE DATOS Y ECONOMÍA A PRUEBA DE FALLOS
-        // ------------------------------------------------------------- 
-        let playerMoney = 0;
-        let ownedCars = ['ae86'];
-
-        function loadData() {
-            try {
-                if (typeof window.localStorage !== 'undefined') {
-                    let money = localStorage.getItem('tg_money');
-                    if (money) playerMoney = parseInt(money);
-                    
-                    let cars = localStorage.getItem('tg_cars');
-                    if (cars) ownedCars = JSON.parse(cars);
-                }
-            } catch (e) {
-                console.warn("El navegador ha bloqueado el acceso a localStorage. El progreso no se guardará de forma persistente.");
-            }
-        }
-
-        function saveData() {
-            try {
-                if (typeof window.localStorage !== 'undefined') {
-                    localStorage.setItem('tg_money', playerMoney.toString());
-                    localStorage.setItem('tg_cars', JSON.stringify(ownedCars));
-                }
-            } catch (e) {
-                // Falla silenciosa si no se puede guardar
-            }
-        }
-
-        const CAR_DATA = {
-            'ae86':    { price: 0,     maxSpeed: 1.05, accel: 0.015, gripTurn: 0.045, driftTurn: 0.075, driftDecel: 0.985, canDrift: true },
-            'rx7':     { price: 15000, maxSpeed: 1.15, accel: 0.018, gripTurn: 0.048, driftTurn: 0.070, driftDecel: 0.980, canDrift: true },
-            'evo':     { price: 25000, maxSpeed: 1.18, accel: 0.022, gripTurn: 0.040, driftTurn: 0.055, driftDecel: 0.975, canDrift: true },
-            'porsche': { price: 40000, maxSpeed: 1.25, accel: 0.025, gripTurn: 0.055, driftTurn: 0.065, driftDecel: 0.965, canDrift: true },
-            'r34':     { price: 60000, maxSpeed: 1.30, accel: 0.020, gripTurn: 0.035, driftTurn: 0.045, driftDecel: 0.970, canDrift: true }
-        };
-
-        function updateShowroomUI() {
-            document.getElementById('money-display').innerText = playerMoney.toLocaleString();
-            
-            Object.keys(CAR_DATA).forEach(type => {
-                const card = document.getElementById('card-' + type);
-                const priceDiv = document.getElementById('price-' + type);
-                if (!card) return;
-                
-                if (ownedCars.includes(type)) {
-                    card.style.opacity = '1';
-                    card.style.filter = 'none';
-                    card.style.borderColor = '#444';
-                    priceDiv.innerHTML = '<span style="color:#00ffcc;">✓ ADQUIRIDO</span> (Clic para Jugar)';
-                } else {
-                    card.style.opacity = '0.75';
-                    card.style.filter = 'grayscale(0.8)';
-                    priceDiv.innerHTML = 'Precio: ¥' + CAR_DATA[type].price.toLocaleString();
-                }
-            });
-        }
-
-        function handleCarClick(type) {
-            if (ownedCars.includes(type)) {
-                startGame(type);
-            } else {
-                let cost = CAR_DATA[type].price;
-                if (playerMoney >= cost) {
-                    playerMoney -= cost;
-                    ownedCars.push(type);
-                    saveData();
-                    updateShowroomUI();
-                    previewCar(type); // Actualiza visual
-                } else {
-                    const card = document.getElementById('card-' + type);
-                    card.style.borderColor = 'red';
-                    setTimeout(() => {
-                        if(!ownedCars.includes(type)) card.style.borderColor = '#444';
-                    }, 400);
-                }
-            }
-        }
-
         // -------------------------------------------------------------  
         // GESTIÓN DE MODOS Y FLUJO
         // ------------------------------------------------------------- 
@@ -562,20 +476,7 @@
             setTimeout(() => {
                 document.getElementById('control-menu').style.display = 'none';
                 document.getElementById('menu').style.display = 'flex';
-                updateShowroomUI();
                 previewCar('ae86'); 
-            }, 400);
-        }
-
-        function goBackToModes() {
-            document.getElementById('menu').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('menu').style.display = 'none';
-                document.getElementById('mode-menu').style.display = 'flex';
-                setTimeout(() => {
-                    document.getElementById('mode-menu').style.opacity = '1';
-                    document.getElementById('menu').style.opacity = '1';
-                }, 50);
             }, 400);
         }
 
@@ -586,76 +487,10 @@
             if (isGameFinished) return;
             isGameFinished = true;
             gameFinishTime = Date.now();
-            
-            // Lógica de recompensas
-            let reward = 0;
-            let distanceTraveled = Math.max(0, Math.floor(-carGroup.position.z));
-            let finalPos = parseInt(document.getElementById('pos-number').innerText) || 1;
-
-            if (gameMode === 'contrarreloj') {
-                reward = 5000;
-            } else if (gameMode === 'endless') {
-                reward = Math.floor(distanceTraveled / 1000) * 1000;
-            } else if (gameMode === 'touge') {
-                if (finalPos === 1) reward = 15000;
-                else if (finalPos === 2) reward = 10000;
-                else if (finalPos === 3) reward = 5000;
-                else reward = 1000;
-            } else if (gameMode === 'streetrace') {
-                if (finalPos === 1) reward = 12000;
-                else if (finalPos === 2) reward = 8000;
-                else if (finalPos === 3) reward = 4000;
-                else reward = 1000;
-            }
-
-            playerMoney += reward;
-            saveData();
-
-            let rewardMsg = reward > 0 ? `<br><span style="font-size:0.5em; color:#00ffcc;">+ ¥${reward.toLocaleString()}</span>` : '';
-
-            document.getElementById('victory-msg').innerHTML = message + rewardMsg;
+            document.getElementById('victory-msg').innerHTML = message;
             document.getElementById('victory-screen').style.display = 'flex';
             keys.ArrowUp = false;
             keys.Space = false;
-        }
-
-        function returnToMenu() {
-            // Ocultar interfaces de carrera
-            document.getElementById('victory-screen').style.display = 'none';
-            document.getElementById('race-hud').style.display = 'none';
-            document.getElementById('speedometer-container').style.display = 'none';
-            document.getElementById('radio-hud').style.display = 'none';
-            document.getElementById('touch-controls').style.display = 'none';
-            
-            isGameRunning = false;
-            isGameFinished = false;
-            radioAudio.pause();
-            
-            // Limpiar objetos de carrera
-            trafficCars.forEach(tc => scene.remove(tc.group)); trafficCars = [];
-            rivals.forEach(r => scene.remove(r.group)); rivals = [];
-            chunks.forEach(c => { scene.remove(c); c.traverse(child => { if(child.geometry) child.geometry.dispose(); }); });
-            chunks.length = 0;
-            
-            // Regresar estilo del showroom
-            scene.background = new THREE.Color(0x131926); 
-            scene.fog.density = 0; // Sin niebla en showroom
-            
-            showroomFloor.visible = true;
-            showroomLight.visible = true;
-            showroomBacklight.visible = true;
-            skybox.visible = false;
-            
-            // Resetear auto
-            carGroup.position.set(0, 0, 0);
-            carGroup.rotation.set(0, 0, 0);
-            speed = 0; driftAngle = 0; moveAngle = 0;
-            
-            // Mostrar menú inicial
-            document.getElementById('menu').style.display = 'flex';
-            document.getElementById('menu').style.opacity = '1';
-            
-            updateShowroomUI();
         }
 
         function formatTime(ms) {
@@ -703,7 +538,6 @@
         // -------------------------------------------------------------  
         const scene = new THREE.Scene();  
         scene.background = new THREE.Color(0x131926);  
-        scene.fog = new THREE.FogExp2(0x131926, 0.0); // Declarada explícitamente en 0
 
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);  
         const renderer = new THREE.WebGLRenderer({ antialias: true });  
@@ -783,6 +617,7 @@
             ctx.beginPath(); ctx.moveTo(64, 0); ctx.lineTo(120, 100); ctx.lineTo(8, 100); ctx.fill();
             ctx.beginPath(); ctx.moveTo(64, 50); ctx.lineTo(128, 150); ctx.lineTo(0, 150); ctx.fill();
             ctx.beginPath(); ctx.moveTo(64, 100); ctx.lineTo(110, 200); ctx.lineTo(18, 200); ctx.fill();
+            // LÍNEA NEGRA REMOVIDA
             return new THREE.CanvasTexture(canvas);
         }
         const treeTex = createTreeTexture();
@@ -799,7 +634,7 @@
             generateTreeMaterials([0x443377, 0x332255, 0x554488, 0x221144])  // Místico (Morado oscuro)
         ];
 
-        // Colores de niebla y fondo asociados a los biomas
+        // Colores de niebla y fondo asociados a los biomas anteriores
         const biomeFogColors = [
             new THREE.Color(0x131926), // Verano
             new THREE.Color(0x1a120a), // Otoño
@@ -826,8 +661,10 @@
         const carGroup = new THREE.Group();  
         scene.add(carGroup);  
 
-        let carConfig = CAR_DATA['ae86']; // Default  
+        let carConfig = {};  
         let speed = 0, moveAngle = 0, driftAngle = 0;  
+        let isGameRunning = false;  
+        let currentPreview = '';  
         let wheels = [];   
 
         const carSpotLight = new THREE.SpotLight(0xfff5cc, 3.0, 50, Math.PI / 5, 0.4);  
@@ -988,7 +825,6 @@
             targetGroup.add(carMeshGroup);
         }
 
-        let currentPreview = '';
         function previewCar(type) {  
             if (isGameRunning || currentPreview === type) return;  
             currentPreview = type; wheels = [];   
@@ -1026,6 +862,7 @@
         // -------------------------------------------------------------  
         const CHUNK_SIZE = 50; const TOTAL_CHUNKS = 8; const ROAD_WIDTH = 24; const chunks = [];  
 
+        // MATEMÁTICA TOUGE - Siempre paso de montaña
         function getRoadCurveOffset(z) { 
             return Math.sin(z * 0.04) * 22 + Math.cos(z * 0.015) * 12; 
         }  
@@ -1043,6 +880,7 @@
             const segments = 25; const step = CHUNK_SIZE / segments;  
             const rPos = [], rUv = [], rIdx = []; const wPos = [], wUv = [], wIdx = [];   
 
+            // Selección de Bioma según la distancia del chunk
             const distance = Math.abs(chunkZ);
             const biomeIndex = Math.floor(distance / 1000) % biomes.length;
             const currentBiomeMaterials = biomes[biomeIndex];
@@ -1088,6 +926,7 @@
             wallMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(wallGeo, 30), new THREE.LineBasicMaterial({ color: outlineColor })));
             chunkGroup.add(wallMesh);  
 
+            // Árboles con el bioma actual
             for (let i = 0; i < 18; i++) {
                 const randomMat = currentBiomeMaterials[Math.floor(Math.random() * currentBiomeMaterials.length)];
                 const tree = new THREE.Sprite(randomMat);
@@ -1185,8 +1024,11 @@
                 rGroup.position.set(roadX + startX, 0, startZ);   
                 scene.add(rGroup);  
 
-                // Rival base speed adaptada para la progresión
-                let baseMaxSpeed = CAR_DATA[randomType].maxSpeed * 0.93; 
+                let baseMaxSpeed = 0.95;
+                if(randomType === 'r34') baseMaxSpeed = 1.05;
+                else if(randomType === 'porsche') baseMaxSpeed = 1.0;
+                else if(randomType === 'rx7') baseMaxSpeed = 0.98;
+                else if(randomType === 'evo') baseMaxSpeed = 1.02;
 
                 rivals.push({  
                     group: rGroup,  
@@ -1246,6 +1088,7 @@
             const tGroup = new THREE.Group();
             buildGenericCar(tGroup, availableColors[Math.floor(Math.random() * availableColors.length)]);
             
+            // Más lejos para poder esquivarlos
             const spawnZ = carGroup.position.z - 500 - Math.random() * 200;
             const laneOffset = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 5);
             
@@ -1266,7 +1109,7 @@
             
             if (gameMode === 'streetrace') { 
                 hasTraffic = true; 
-                density = 0.015; 
+                density = 0.015; // Menos densidad
             } else if (gameMode === 'endless' && endlessConfig.traffic) { 
                 hasTraffic = true; 
                 density = endlessConfig.density; 
@@ -1280,7 +1123,7 @@
 
             for (let i = trafficCars.length - 1; i >= 0; i--) {
                 let tc = trafficCars[i];
-                tc.z += tc.speed; 
+                tc.z += tc.speed; // Avanza hacia el jugador (+Z)
                 
                 const dx = getCurveDerivative(tc.z);
                 const nx = 1 / Math.sqrt(1 + dx * dx);
@@ -1365,7 +1208,7 @@
             document.getElementById('race-hud').style.display = 'block';  
             
             scene.background = new THREE.Color(0x131926); 
-            scene.fog.density = 0.025; 
+            scene.fog = new THREE.FogExp2(0x131926, 0.025); 
             
             showroomFloor.visible = false;
             showroomLight.visible = false;
@@ -1383,8 +1226,17 @@
             carGroup.rotation.set(0, 0, 0);  
             carSpotLight.visible = true;  
 
-            // Aplicar físicas configuradas de CAR_DATA
-            carConfig = CAR_DATA[type];
+            if (type === 'ae86') {  
+                carConfig = { maxSpeed: 1.12, accel: 0.018, gripTurn: 0.042, driftTurn: 0.07, driftDecel: 0.975, canDrift: true };  
+            } else if (type === 'r34') {  
+                carConfig = { maxSpeed: 1.15, accel: 0.016, gripTurn: 0.028, driftTurn: 0.040, driftDecel: 0.970, canDrift: true };  
+            } else if (type === 'porsche') {  
+                carConfig = { maxSpeed: 1.10, accel: 0.022, gripTurn: 0.050, driftTurn: 0.060, driftDecel: 0.960, canDrift: true };  
+            } else if (type === 'rx7') {
+                carConfig = { maxSpeed: 1.13, accel: 0.019, gripTurn: 0.045, driftTurn: 0.065, driftDecel: 0.972, canDrift: true };
+            } else if (type === 'evo') {
+                carConfig = { maxSpeed: 1.14, accel: 0.021, gripTurn: 0.035, driftTurn: 0.045, driftDecel: 0.965, canDrift: true };
+            }
 
             currentTrackIndex = Math.floor(Math.random() * radioPlaylist.length);  
             playRadioStation(currentTrackIndex);  
@@ -1471,7 +1323,7 @@
             });  
         }  
 
-        function updateRaceHUD() {  
+        function updateHUD() {  
             let distanceTraveled = Math.max(0, Math.floor(-carGroup.position.z));  
             let timeMs = isGameFinished ? (gameFinishTime - gameStartTime) : (Date.now() - gameStartTime);
             let displayContainer = document.getElementById('dist-time-container');
@@ -1652,7 +1504,7 @@
             if (!isGameRunning) {  
                 let panX = window.innerWidth > 768 ? 2.5 : 0; 
                 camera.position.lerp(new THREE.Vector3(panX + 1.0, 2.5, 6.5), 0.05);  
-                camera.lookAt(new THREE.Vector3(panX, 0.5, 0));  
+                camera.lookAt(panX, 0.5, 0);  
                 carGroup.rotation.y += 0.005;  
                 return;  
             }  
@@ -1711,8 +1563,8 @@
                 updateRivals();  
                 updateTraffic();
                 checkCollisions();  
-                updateRaceHUD();
-                updateEnvironment(); 
+                updateHUD();
+                updateEnvironment(); // Nueva transición de niebla y cielos
             }  
             updateCamera();  
             renderer.render(scene, camera);  
@@ -1723,15 +1575,7 @@
             camera.updateProjectionMatrix();  
             renderer.setSize(window.innerWidth, window.innerHeight);  
         });  
-        
-        // INICIO A PRUEBA DE FALLOS
-        try {
-            loadData();
-        } catch(e) {
-            console.warn(e);
-        }
-        
-        previewCar('ae86'); // Cargamos un coche para que el menú no tenga fondo negro
+          
         animate();   
 
     </script>  
